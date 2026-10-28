@@ -12,21 +12,33 @@ board. Nothing moves to a separate machine before week 15.
 
 - Week 5 is the first time a broker exists at all (`Mosquitto: أول pub/sub`).
   Weeks 1–4 need no always-on service.
-- The ESP32 sits on the home LAN and must reach the broker over TCP 1883 at the
-  PC's LAN address.
-- This PC: Ethernet `192.168.1.4`. WSL2 Ubuntu defaults to NAT
-  (`192.168.122.191`, gateway `192.168.112.1`), which the ESP32 **cannot**
-  reach. Mirrored networking makes WSL2 answer on `192.168.1.4` itself, so no
-  port-forward (`netsh interface portproxy`) and no WSL IP bookkeeping.
-- ESP-IDF already runs on Windows and needs the USB/serial port, which is
-  awkward inside WSL2 (`usbipd-win`). Keeping the toolchain on Windows removes
-  that whole class of problems.
+- The ESP32 must reach the broker over TCP 1883 at whatever LAN address the PC
+  holds at that moment.
+- This PC is on a **phone hotspot**, so the address is not stable. Measured
+  2026-10-28: Wi-Fi `10.131.42.56/24`, gateway `10.131.42.205`. It changes with
+  the upstream network, so the broker address is read at the start of each
+  session (`ip -4 addr`), never hardcoded. (The earlier `192.168.1.4` came from
+  the PC where this repo was created; it does not exist here.)
+- WSL2 Ubuntu defaults to NAT, which the ESP32 cannot reach.
+  `networkingMode=mirrored` is already set in `C:\Users\adelf\.wslconfig` and
+  was verified: inside WSL2 the interface `eth2` holds `10.131.42.56`, the same
+  address as the Windows Wi-Fi adapter. So WSL2 answers on the Windows address
+  itself — no port-forward (`netsh interface portproxy`), no WSL IP bookkeeping.
+- **Open risk for week 5:** a phone hotspot can isolate clients, and
+  `10.131.42.x` with a `.205` gateway looks more like carrier NAT than a real
+  LAN. If the ESP32 cannot open a TCP connection to the PC, this plan needs a
+  fallback (Pi acting as its own AP, or a small router). Test reachability in
+  both directions *before* writing the MQTT client.
+- ESP-IDF already runs on Windows — `C:\esp\v6.1\esp-idf` (v6.1), projects in
+  `D:\esp-idf_projects` — and needs the USB/serial port, which is awkward inside
+  WSL2 (`usbipd-win`). Keeping the toolchain on Windows removes that whole class
+  of problems.
 
 ## Options considered
 
 | Option | Cost | Uptime | ESP32 can reach it | Verdict |
 |---|---|---|---|---|
-| WSL2 (mirrored) | 0 | only while the PC is on | yes, same LAN IP | **chosen for weeks 5–14** |
+| WSL2 (mirrored) | 0 | only while the PC is on | yes, same LAN IP — unless the hotspot isolates clients (unverified) | **chosen for weeks 5–14** |
 | Raspberry Pi | hardware cost (verify price at purchase) | 24/7 | yes, own LAN IP | week 15 |
 | VPS | monthly cost (verify) | 24/7 | only via tunnel/VPN | rejected now |
 
