@@ -12,7 +12,7 @@ hosting decision for the MQTT broker that arrives in week 5.
 |---|---|
 | `COMMANDS.md` | 22 Linux and Git commands I ran myself, with what each one does and what I actually saw on screen |
 | `median.cpp` | Small C++ program: median of 5 numbers, written twice — once passing the struct by reference, once by pointer |
-| `HOST.md` | One-page decision record: the MQTT broker runs in WSL2 on this PC for weeks 1–6 and moves to a Raspberry Pi at week 15, with the cost and the conditions that would change the decision |
+| `HOST.md` | One-page decision record: the MQTT broker runs in WSL2 on the work PC (the one with ESP-IDF) for weeks 1–6 and moves to a Raspberry Pi at week 15, with the cost, the fallback and the conditions that would change the decision |
 | `blink.jpg` | Photo of the ESP32 board running the ESP-IDF blink example |
 | `.gitignore` | Keeps build output and compiled binaries out of git |
 
@@ -59,11 +59,13 @@ Median (by pointer):    5.00
 ## Hosting decision
 
 The broker is not part of week 1. `HOST.md` records *where it will run* so the
-choice is not re-argued later: Mosquitto inside WSL2 with mirrored networking,
-because that puts the broker on the same LAN address as the PC (`192.168.1.4`),
-so an ESP32 on the home network reaches it without port forwarding. ESP-IDF
-stays on Windows for USB flashing. Revisit trigger: week 15, when the plan needs
-a broker that survives a reboot.
+choice is not re-argued later: Mosquitto in WSL2 on the work PC — the machine
+that already holds ESP-IDF — so broker, test clients and toolchain live in one
+place. LAN access from the ESP32 uses mirrored networking when it works, and
+NAT plus a port-forward when it does not; that fallback is there because
+mirroring was tried on the secondary PC and killed all WSL networking, which was
+reverted. Revisit trigger: week 15, when the plan needs a broker that survives a
+reboot.
 
 ## Where this is going
 
