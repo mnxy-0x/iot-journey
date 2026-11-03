@@ -1,6 +1,6 @@
 command | output
-1 | ping -c 1 google.com | 1- DNS translation, then 3 ICMP protocol packets sent to proble the server either respond or not.
+1 | ping -c 1 google.com | PING google.com (142.251.36.142) 56(84) bytes of data.
 
-2 | curl -v google.com | detailed server's response (DNS translation, http GET request headers & body, then http GET respond headers & body)
+2 | curl -v google.com | < HTTP/1.1 301 Moved Permanently
 
-3 | ss -tulpn | list life sockets in current machine. interface_IP:port, either (tcp, udp)
+3 | ss -tulpn | udp    UNCONN  0       0             127.0.0.54:53            0.0.0.0:*
